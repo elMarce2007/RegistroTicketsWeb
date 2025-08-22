@@ -1,0 +1,27 @@
+<div class="p-6 bg-white rounded shadow">
+  <h1 class="text-2xl font-bold mb-4">Gestión de Técnicos</h1>
+
+  <table class="min-w-full border border-gray-200">
+    <thead class="bg-gray-100">
+    <tr>
+      <th class="px-4 py-2 text-left">ID</th>
+      <th class="px-4 py-2 text-left">Nombre</th>
+      <th class="px-4 py-2 text-left">Especialidad</th>
+      <th class="px-4 py-2">Acciones</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let t of tecnicos" class="border-t">
+      <td class="px-4 py-2">{{ t.id }}</td>
+      <td class="px-4 py-2">{{ t.nombreTecnico }}</td>
+      <td class="px-4 py-2">{{ t.especialidadTecnico }}</td>
+      <td class="px-4 py-2 text-center">
+        <button class="bg-blue-500 text-white px-2 py-1 rounded mr-2">✏️ Editar</button>
+        <button (click)="eliminar(t.id)" class="bg-red-500 text-white px-2 py-1 rounded">🗑️ Eliminar</button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="loading" class="mt-4 text-gray-500">Cargando técnicos...</div>
+</div>
