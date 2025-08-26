@@ -1,0 +1,23 @@
+<!-- src/app/layout/components/main-layout/main-layout.component.html -->
+<!-- Layout minimalista al estilo dashboard -->
+<div class="min-h-screen grid grid-cols-[240px_1fr] grid-rows-[56px_1fr]">
+  <!-- Sidebar -->
+  <aside class="row-span-2 bg-gray-900 text-white p-4">
+    <h2 class="text-lg font-semibold mb-6">RegistroTickets</h2>
+    <nav class="space-y-2">
+      <!-- Emula el estilo del profe: links claros por feature -->
+      <a routerLink="/tecnicos" class="block px-3 py-2 rounded hover:bg-gray-800">Técnicos</a>
+      <!-- Agrega más secciones del dashboard aquí -->
+    </nav>
+  </aside>
+
+  <!-- Header -->
+  <header class="bg-white border-b flex items-center px-4">
+    <div class="text-sm text-gray-600">Dashboard</div>
+  </header>
+
+  <!-- Content -->
+  <main class="bg-gray-50 p-6">
+    <router-outlet></router-outlet>
+  </main>
+</div>
