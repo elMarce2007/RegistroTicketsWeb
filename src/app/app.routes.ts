@@ -1,7 +1,8 @@
 import { Routes } from '@angular/router';
-import { Home } from './home/home';
+import {TECNICOS_ROUTES} from './features/tecnico/tecnicos.routes';
 
 export const routes: Routes = [
-  { path: '', component: Home },
-  { path: '**', redirectTo: '' }
+  { path: '', redirectTo: '/tecnicos', pathMatch: 'full' },
+  { path: 'tecnicos', children: TECNICOS_ROUTES },
+  { path: '**', redirectTo: '/tecnicos' }
 ];

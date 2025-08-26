@@ -1,0 +1,59 @@
+<div class="p-6 max-w-5xl mx-auto bg-white rounded-lg shadow-md">
+  <h2 class="text-2xl font-bold text-gray-800 mb-4">👨‍🔧 Lista de Técnicos</h2>
+
+  <div class="mb-4">
+    <button
+      (click)="goToCreate()"
+      class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition">
+      ➕ Nuevo Técnico
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="text-blue-500 font-medium">Cargando ...</div>
+  }
+
+  @if (error()) {
+    <div class="text-red-600 font-medium">{{ error() }}</div>
+  }
+
+  @if (!loading() && tecnicos().length > 0) {
+    <div class="overflow-x-auto">
+      <table class="w-full border border-gray-300 rounded-lg overflow-hidden shadow-sm">
+        <thead class="bg-gray-100">
+        <tr>
+          <th class="px-4 py-2 border">ID</th>
+          <th class="px-4 py-2 border">Nombre</th>
+          <th class="px-4 py-2 border">Especialidad</th>
+          <th class="px-4 py-2 border">Usuario Creación</th>
+          <th class="px-4 py-2 border">Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+          @for (tecnico of tecnicos(); track tecnico.id) {
+            <tr class="hover:bg-gray-50 transition">
+              <td class="px-4 py-2 border">{{ tecnico.id }}</td>
+              <td class="px-4 py-2 border">{{ tecnico.nombreTecnico }}</td>
+              <td class="px-4 py-2 border">{{ tecnico.especialidadTecnico }}</td>
+              <td class="px-4 py-2 border">{{ tecnico.usuarioCreacion }}</td>
+              <td class="px-4 py-2 border text-center space-x-2">
+                <button
+                  (click)="goToEdit(tecnico.id!)"
+                  class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-lg shadow">
+                  ✏️ Editar
+                </button>
+                <button
+                  (click)="delete(tecnico.id!)"
+                  class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-lg shadow">
+                  🗑️ Eliminar
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else {
+    <div class="text-gray-500 italic">No hay técnicos registrados</div>
+  }
+</div>
