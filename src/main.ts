@@ -1,5 +1,6 @@
 // src/main.ts
 // Bootstrap standalone + Router + HttpClient
+import 'zone.js';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
