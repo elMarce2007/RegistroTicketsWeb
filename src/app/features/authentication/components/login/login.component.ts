@@ -1,24 +1,26 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService } from '../../../../core/auth/services/auth.service';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../../../core/auth/services/auth.service';
 
 @Component({
   selector: 'app-login',
-  imports: [
-    ReactiveFormsModule,  // Para formularios reactivos
-    CommonModule          // Para *ngIf, *ngFor, etc.
-  ],
+  standalone: true,
+  imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.scss'
+  styleUrls: ['./login.component.scss']
 })
 export class LoginComponent {
   form: FormGroup;
   loading = false;
   error: string | null = null;
 
-  constructor(readonly fb: FormBuilder, readonly authService: AuthService, readonly router: Router) {
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private router: Router
+  ) {
     this.form = this.fb.group({
       username: ['', [Validators.required, Validators.minLength(3)]],
       password: ['', [Validators.required, Validators.minLength(6)]]
@@ -40,7 +42,7 @@ export class LoginComponent {
     }
 
     this.loading = true;
-    this.authService.signIn(this.form.value).subscribe({
+    this.authService.login(this.form.value).subscribe({
       next: () => {
         this.loading = false;
         this.router.navigateByUrl('/tecnicos');
@@ -51,4 +53,5 @@ export class LoginComponent {
       }
     });
   }
+
 }

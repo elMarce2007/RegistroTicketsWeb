@@ -1,166 +1,88 @@
-import {inject, Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {Observable, throwError, switchMap, of, catchError} from 'rxjs';
-import {environment} from '../../../../environments/enviroment';
+// src/app/core/auth/services/auth.service.ts
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
+import { environment } from '../../../../environments/enviroment';
+import {Observable, of, tap} from 'rxjs';
 import {AuthUtils} from '../auth.utils';
 
-@Injectable({providedIn: 'root'})
+
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
+}
+
+@Injectable({ providedIn: 'root' })
 export class AuthService {
-  //private baseUrl = 'http://localhost:8080/api'; // tu API backend
-  private _authenticated: boolean = false;
-  readonly _httpClient = inject(HttpClient);
-  private readonly baseUrl = environment.apiUrl;
-  private refreshTimer: any;
+  private http = inject(HttpClient);
+  private router = inject(Router);
 
-  //constructor(private _httpClient: HttpClient) { }
-
-  // 👉 Aquí va el método
-  getUsuarios(): Observable<any> {
-    return this._httpClient.get(`${this.baseUrl}/usuarios`);
-  }
-
-  // -----------------------------------------------------------------------------------------------------
-  // @ Accessors
-  // -----------------------------------------------------------------------------------------------------
+  private readonly apiUrl = `${environment.apiUrl}/public/api/auth`;
 
   /**
-   * Setter & getter for access token
+   * Realiza login y guarda el token en localStorage
    */
-  set accessToken(token: string) {
-    localStorage.setItem('accessToken', token);
-  }
+  login(payload: LoginRequest) {
+    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, payload).pipe(
+      tap((res) => {
+        console.log('✅ Login exitoso, token recibido:', res.accessToken);
 
-  get accessToken(): string {
-    return localStorage.getItem('accessToken') ?? '';
-  }
-
-  /**
-   * Setter & getter for refresh token
-   */
-  set refreshToken(token: string) {
-    localStorage.setItem('refreshToken', token);
-  }
-
-  get refreshToken(): string {
-    return localStorage.getItem('refreshToken') ?? '';
-  }
-
-  // -----------------------------------------------------------------------------------------------------
-  // @ Public methods
-  // -----------------------------------------------------------------------------------------------------
-
-  /**
-   * Sign in
-   *
-   * @param credentials
-   */
-  signIn(credentials: { username: string; password: string }): Observable<any> {
-    // Throw error if the user is already logged in
-    if (this._authenticated) {
-      return throwError(() => new Error('El usuario ya ha iniciado sesión.'));
-    }
-
-    return this._httpClient.post(`${this.baseUrl}/public/api/auth/login`, credentials).pipe(
-      switchMap((response: any) => {
-        // Store the access token and refresh token in local storage
-        this.accessToken = response.data.accessToken;
-        this.refreshToken = response.data.refreshToken;
-
-        // Set the authenticated flag to true
-        this._authenticated = true;
-
-        // Start the token refresh timer
-        this.startTokenRefreshTimer();
-
-        // Return a new observable with the response
-        return of(response.data);
-      }),
+        // Guardamos tokens en localStorage
+        localStorage.setItem('accessToken', res.accessToken);
+        localStorage.setItem('refreshToken', res.refreshToken);
+        localStorage.setItem('expiresIn', res.expiresIn.toString());
+      })
     );
   }
 
-  /**
-   * Refresh the access token using the refresh token
-   */
-  refreshAccessToken(): Observable<any> {
-    // If no refresh token is available, we cannot refresh the access token
-    if (!this.refreshToken) {
-      return throwError(() => new Error('Refresh token no disponible'));
-    }
-
-    return this._httpClient
-      .post(`${this.baseUrl}/public/api/auth/refresh`, {refreshToken: this.refreshToken})
-      .pipe(
-        switchMap((response: any) => {
-          // Update the access token and return the response
-          this.accessToken = response.data.accessToken;
-          this.refreshToken = response.data.refreshToken;
-          this.startTokenRefreshTimer();
-          return of(response.data);
-        })
-      );
-  }
 
   /**
-   * Sign out
+   * Cierra sesión eliminando los tokens
    */
-  signOut(): Observable<any> {
-    // Remove the access token and refresh token from local storage
+  logout() {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
-
-    // Set the authenticated flag to false
-    this._authenticated = false;
-    if (this.refreshTimer) {
-      clearTimeout(this.refreshTimer);
-    }
-
-    return of(true);
+    localStorage.removeItem('expiresIn');
+    this.router.navigate(['/auth/login']);
   }
 
   /**
-   * Check the authentication status
+   * Devuelve el token actual (si existe)
    */
-  check(): Observable<boolean> {
-    // Check if the user is logged in
-    if (this._authenticated) {
-      return of(true);
-    }
+  getToken(): string | null {
+    return localStorage.getItem('accessToken');
+  }
 
-    // Check if the access token is expired
-    if (AuthUtils.isTokenExpired(this.accessToken, 10)) {
-      return this.refreshAccessToken().pipe(
-        switchMap(() => of(true)),
-        catchError(() => of(false))
-      );
-    }
+  /**
+   * Saber si hay sesión activa
+   */
+  isLoggedIn(): boolean {
+    return !!this.getToken();
+  }
 
-    // Check if the access token exists and is valid
-    if (!this.accessToken) {
+  /**
+   * Verifica si el usuario está autenticado
+   * (usado por los guards).
+   */
+  check() {
+    const token = this.getToken();
+
+    if (!token) {
       return of(false);
     }
 
+    // Si el token está expirado
+    if (AuthUtils.isTokenExpired(token)) {
+      return of(false);
+    }
+
+    // Token válido
     return of(true);
   }
-
-  /**
-   * Start the timer that will refresh the token 10 seconds before expiration
-   */
-  private startTokenRefreshTimer(): void {
-    if (this.refreshTimer) {
-      clearTimeout(this.refreshTimer);
-    }
-
-    const timeUntilExpiry = AuthUtils.getTimeUntilTokenExpires(this.accessToken, 10);
-    if (timeUntilExpiry > 0) {
-      this.refreshTimer = setTimeout(() => {
-        this.refreshAccessToken().subscribe({
-          error: (error) => {
-            console.error('Error renovando token:', error);
-          }
-        });
-      }, timeUntilExpiry);
-    }
-  }
-
 }
-

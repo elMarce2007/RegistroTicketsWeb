@@ -1,15 +1,19 @@
+// src/app/core/auth/interceptors/auth.interceptor.ts
 import { HttpInterceptorFn } from '@angular/common/http';
 
-/**
- * Attaches Authorization header with Bearer token if available in localStorage.
- */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const token = localStorage.getItem('accessToken');
-  if (token && !req.headers.has('Authorization')) {
+
+  if (token) {
+    console.log('📌 Usando token en petición:', req.url);
     const authReq = req.clone({
-      setHeaders: { Authorization: `Bearer ${token}` }
+      setHeaders: {
+        Authorization: `Bearer ${token}`
+      }
     });
     return next(authReq);
   }
+
+  console.warn('⚠️ No se encontró token para la request:', req.url);
   return next(req);
 };

@@ -8,8 +8,10 @@ import {environment} from '../../../../environments/enviroment';
 /**
  * TecnicoApiService
  * - Encapsula llamadas REST y un cache simple con señal + reload().
+
  * - Patrón similar a “employee service” del profe (estilo dashboard).
  */
+// src/app/features/tecnico/services/tecnico-api.service.ts
 @Injectable({ providedIn: 'root' })
 export class TecnicoApiService {
   private http = inject(HttpClient);
