@@ -6,10 +6,18 @@ import {AuthUtils} from '../auth.utils';
 
 @Injectable({providedIn: 'root'})
 export class AuthService {
+  //private baseUrl = 'http://localhost:8080/api'; // tu API backend
   private _authenticated: boolean = false;
   readonly _httpClient = inject(HttpClient);
   private readonly baseUrl = environment.apiUrl;
   private refreshTimer: any;
+
+  //constructor(private _httpClient: HttpClient) { }
+
+  // 👉 Aquí va el método
+  getUsuarios(): Observable<any> {
+    return this._httpClient.get(`${this.baseUrl}/usuarios`);
+  }
 
   // -----------------------------------------------------------------------------------------------------
   // @ Accessors

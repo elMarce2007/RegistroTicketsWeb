@@ -43,7 +43,7 @@ export class LoginComponent {
     this.authService.signIn(this.form.value).subscribe({
       next: () => {
         this.loading = false;
-        this.router.navigateByUrl('/dashboard');
+        this.router.navigateByUrl('/tecnicos');
       },
       error: (err) => {
         this.loading = false;

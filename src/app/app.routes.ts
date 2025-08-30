@@ -1,22 +1,31 @@
-// src/app/app.authentication.routes.ts
 import { Routes } from '@angular/router';
 import MainLayout from './layout/components/main-layout/main-layout.component';
 import TecnicoDashboard from './features/tecnico/pages/tecnico-dashboard/tecnico-dashboard';
 
 export const routes: Routes = [
+  // 👉 ruta inicial: al cargar la app te manda al login
+  {
+    path: '',
+    redirectTo: 'auth/login',
+    pathMatch: 'full',
+  },
+
+  // 👉 rutas principales (solo accesibles después del login)
   {
     path: '',
     component: MainLayout,
     children: [
-      { path: '', redirectTo: 'tecnicos', pathMatch: 'full' },
       { path: 'tecnicos', component: TecnicoDashboard },
-      //{ path: '**', redirectTo: 'tecnicos' },
     ],
   },
 
+  // 👉 módulo de autenticación (login, register, etc.)
   {
     path: 'auth',
-    loadChildren: () => import('./features/authentication/authentication.routes').then(m => m.default)
+    loadChildren: () =>
+      import('./features/authentication/authentication.routes').then(m => m.default),
   },
-  {path: '**', redirectTo: '' },
+
+  // 👉 cualquier ruta desconocida redirige al login
+  { path: '**', redirectTo: 'auth/login' },
 ];
